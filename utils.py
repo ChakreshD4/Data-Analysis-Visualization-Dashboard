@@ -128,3 +128,31 @@ class Visualizer:
         plt.ylabel("Frequency")
         plt.tight_layout()
         st.pyplot(plt)
+
+# Streamlit app integration
+def main():
+    # Initialize DataProcessor and Visualizer
+    data_processor = DataProcessor('data.csv')  # Replace 'data.csv' with the actual path
+    data = data_processor.load_data()
+
+    # Check if the data is valid
+    if data_processor.is_valid():
+        # Filter the data based on some conditions (example: 'Physician' provider type and 'Cardiology' specialty)
+        filtered_data = data_processor.filter_data(provider_type_filter=['Physician'], specialty_filter=['Cardiology'])
+
+        # Initialize the Visualizer with the filtered data
+        visualizer = Visualizer(filtered_data)
+
+        # Display the visualizations using Streamlit
+        st.title('Healthcare Data Visualization Dashboard')
+
+        # Call the visualization methods
+        visualizer.plot_work_hours_by_role()
+        visualizer.plot_stress_level_by_department()
+        visualizer.plot_burnout_by_gender()
+        visualizer.plot_sleep_stress_correlation()
+        visualizer.plot_work_hours_burnout()
+        visualizer.plot_age_distribution()
+
+if __name__ == "__main__":
+    main()
