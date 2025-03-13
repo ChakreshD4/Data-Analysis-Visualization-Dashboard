@@ -1,9 +1,8 @@
-# utils.py
-
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import logging
+import streamlit as st  # Ensure streamlit is imported for st.pyplot
 
 class DataProcessor:
     def __init__(self, file_path):
@@ -65,7 +64,7 @@ class Visualizer:
         plt.ylabel("Work Hours")
         plt.xticks(rotation=45)
         plt.tight_layout()
-        st.pyplot(plt)
+        st.pyplot(plt)  # Ensure plt is passed correctly
 
     def plot_stress_level_by_department(self):
         """
@@ -97,7 +96,8 @@ class Visualizer:
         Plot correlation between sleep and stress.
         """
         plt.figure(figsize=(10, 6))
-        sns.scatterplot(x="Numerator", y="Denominator", data=self.data[(self.data['Metric'] == 'Sleep') | (self.data['Metric'] == 'Stress Level')])
+        sleep_stress_data = self.data[(self.data['Metric'] == 'Sleep') | (self.data['Metric'] == 'Stress Level')]
+        sns.scatterplot(x="Numerator", y="Denominator", data=sleep_stress_data)
         plt.title("Sleep vs Stress Correlation")
         plt.xlabel("Sleep (Numerator)")
         plt.ylabel("Stress Level (Denominator)")
@@ -109,7 +109,8 @@ class Visualizer:
         Plot work hours vs burnout.
         """
         plt.figure(figsize=(10, 6))
-        sns.scatterplot(x="Numerator", y="Denominator", data=self.data[(self.data['Metric'] == 'Work Hours') | (self.data['Metric'] == 'Burnout')])
+        work_burnout_data = self.data[(self.data['Metric'] == 'Work Hours') | (self.data['Metric'] == 'Burnout')]
+        sns.scatterplot(x="Numerator", y="Denominator", data=work_burnout_data)
         plt.title("Work Hours vs Burnout")
         plt.xlabel("Work Hours (Numerator)")
         plt.ylabel("Burnout Level (Denominator)")
