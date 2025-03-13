@@ -22,7 +22,9 @@ class DataProcessor:
     def is_valid(self):
         if self.data is None:
             return False
-        required_columns = ['Provider ID', 'ProviderType', 'Specialty', 'ReportingMetric', 'Value']
+        required_columns = ["Type", "Provider Identifier", "ProviderType", "ServiceArea", "Specialty",
+                            "UserType", "ReportingPeriodStartDate", "ReportingPeriodEndDate", "Metric",
+                            "Numerator", "Denominator", "Value"]
         return all(col in self.data.columns for col in required_columns)
 
     def filter_data(self, provider_type_filter, specialty_filter):
@@ -35,7 +37,7 @@ class DataProcessor:
 
     def get_unique_metrics(self):
         if self.data is not None:
-            return self.data['ReportingMetric'].unique()
+            return self.data['Metric'].unique()
         return []
 
 class Visualizer:
@@ -53,11 +55,11 @@ class Visualizer:
             st.warning("No data found for the selected rows.")
             return
 
-        if metric_to_visualize not in comparison_data['ReportingMetric'].values:
+        if metric_to_visualize not in comparison_data['Metric'].values:
             st.warning(f"'{metric_to_visualize}' not found in the selected rows.")
             return
 
-        comparison_data = comparison_data[comparison_data['ReportingMetric'] == metric_to_visualize]
+        comparison_data = comparison_data[comparison_data['Metric'] == metric_to_visualize]
 
         if comparison_data.empty:
             st.warning(f"No data found for '{metric_to_visualize}' in the selected rows.")

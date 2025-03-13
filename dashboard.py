@@ -5,7 +5,7 @@ from pathlib import Path
 
 st.set_page_config(page_title="Healthcare Provider Burnout Dashboard", layout="wide")
 
-st.title("AI-Based Medical Provider Burnout Prevention Dashboard")
+st.title("Healthcare Provider Burnout Dashboard")
 st.markdown("""
 This interactive dashboard presents key insights into healthcare provider burnout. 
 Explore trends and compare selected rows!
