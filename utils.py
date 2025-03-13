@@ -35,39 +35,51 @@ class DataProcessor:
             filtered_data = filtered_data[filtered_data['Specialty'].isin(specialty_filter)]
         return filtered_data
 
-    def get_unique_metrics(self):
-        if self.data is not None:
-            return self.data['Metric'].unique()
-        return []
-
 class Visualizer:
     def __init__(self, data):
         self.data = data
 
-    def plot_selected_rows(self, selected_rows, metric_to_visualize):
-        if not selected_rows:
-            st.warning("Please select rows to compare.")
-            return
+    def plot_time_in_vs_orders(self):
+        in_basket_data = self.data[self.data['Metric'] == "Time in In Basket per Day"]
+        orders_data = self.data[self.data['Metric'] == "Time in Orders per Day"]
+        if not in_basket_data.empty and not orders_data.empty:
+            fig, ax = plt.subplots()
+            ax.scatter(in_basket_data['Value'], orders_data['Value'])
+            ax.set_xlabel("Time in In Basket per Day")
+            ax.set_ylabel("Time in Orders per Day")
+            st.pyplot(fig)
+        else:
+            st.write("No data to display for Time in In Basket vs Orders.")
 
-        comparison_data = self.data[self.data.index.isin(selected_rows)]
+    def plot_appointment_efficiency(self):
+        efficiency_metrics = ["Appointments per Day", "Percent of Appointments Closed Same Day"]
+        efficiency_data = self.data[self.data['Metric'].isin(efficiency_metrics)]
+        if not efficiency_data.empty:
+            fig, ax = plt.subplots()
+            sns.barplot(x='Metric', y='Value', data=efficiency_data, ax=ax)
+            plt.xticks(rotation=45, ha='right')
+            st.pyplot(fig)
+        else:
+            st.write("No data to display for appointment efficiency.")
 
-        if comparison_data.empty:
-            st.warning("No data found for the selected rows.")
-            return
+    def plot_time_metrics_line(self):
+        time_metrics = self.data[self.data['Metric'].str.contains("Time in")]
+        if not time_metrics.empty:
+            fig, ax = plt.subplots()
+            ax.plot(time_metrics['Metric'], time_metrics['Value'])
+            plt.xticks(rotation=45, ha='right')
+            ax.set_ylabel("Value")
+            st.pyplot(fig)
+        else:
+            st.write("No data to display for Time metrics.")
 
-        if metric_to_visualize not in comparison_data['Metric'].values:
-            st.warning(f"'{metric_to_visualize}' not found in the selected rows.")
-            return
-
-        comparison_data = comparison_data[comparison_data['Metric'] == metric_to_visualize]
-
-        if comparison_data.empty:
-            st.warning(f"No data found for '{metric_to_visualize}' in the selected rows.")
-            return
-
-        fig, ax = plt.subplots()
-        ax.bar(comparison_data.index, comparison_data['Value'])
-        ax.set_xlabel("Row Index")
-        ax.set_ylabel("Value")
-        ax.set_title(f"Comparison of '{metric_to_visualize}'")
-        st.pyplot(fig)
+    def plot_documentation_histogram(self):
+        doc_data = self.data[self.data['Metric'] == "Documentation Length"]
+        if not doc_data.empty:
+            fig, ax = plt.subplots()
+            ax.hist(doc_data['Value'], bins=10)
+            ax.set_xlabel("Documentation Length Value")
+            ax.set_ylabel("Frequency")
+            st.pyplot(fig)
+        else:
+            st.write("No data to display for Documentation Length histogram.")

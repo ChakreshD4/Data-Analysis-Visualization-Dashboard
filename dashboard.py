@@ -3,13 +3,9 @@ import pandas as pd
 from utils import DataProcessor, Visualizer
 from pathlib import Path
 
-st.set_page_config(page_title="Healthcare Provider Burnout Dashboard", layout="wide")
+st.set_page_config(page_title="Healthcare Provider Dashboard", layout="wide")
 
-st.title("Healthcare Provider Burnout Dashboard")
-st.markdown("""
-This interactive dashboard presents key insights into healthcare provider burnout. 
-Explore trends and compare selected rows!
-""")
+st.title("Healthcare Provider Performance Dashboard")
 
 DATA_DIRECTORY = Path("data/")
 DATA_DIRECTORY.mkdir(parents=True, exist_ok=True)
@@ -26,22 +22,20 @@ if uploaded_file is not None:
 
     if data_processor.is_valid():
         st.success("Dataset loaded and validated successfully!")
-        st.write("### Dataset Preview", data.head())
-        st.write("### Data Summary", data.describe())
 
-        st.sidebar.title("Filter Options")
-        provider_type_filter = st.sidebar.multiselect('Select Provider Type:', data['ProviderType'].unique())
-        specialty_filter = st.sidebar.multiselect('Select Specialty:', data['Specialty'].unique())
+        visualizer = Visualizer(data)
 
-        filtered_data = data_processor.filter_data(provider_type_filter, specialty_filter)
+        st.subheader("Time in In Basket vs Orders (Scatter Plot)")
+        visualizer.plot_time_in_vs_orders()
 
-        st.subheader("Select Rows for Comparison")
-        selected_rows = st.multiselect("Select rows by index:", filtered_data.index)
+        st.subheader("Appointment Efficiency (Bar Chart)")
+        visualizer.plot_appointment_efficiency()
 
-        metric_to_visualize = st.selectbox("Select metric to visualize:", data_processor.get_unique_metrics())
+        st.subheader("Time Metrics (Line Chart)")
+        visualizer.plot_time_metrics_line()
 
-        visualizer = Visualizer(filtered_data)
-        visualizer.plot_selected_rows(selected_rows, metric_to_visualize)
+        st.subheader("Documentation Length Distribution (Histogram)")
+        visualizer.plot_documentation_histogram()
 
     else:
         st.error("Dataset is invalid. Please check the column names and data integrity.")
