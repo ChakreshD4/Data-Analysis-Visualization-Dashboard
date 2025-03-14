@@ -1,43 +1,61 @@
 import streamlit as st
 import pandas as pd
-from utils import DataProcessor, Visualizer
-from pathlib import Path
+from utils import process_csv, create_plot
 
-st.set_page_config(page_title="Healthcare Provider Dashboard", layout="wide")
+# Set up the page layout and title
+st.set_page_config(page_title="Healthcare Data Dashboard", layout="wide")
 
-st.title("Healthcare Provider Performance Dashboard")
+st.title("Healthcare Data Dashboard")
 
-DATA_DIRECTORY = Path("data/")
-DATA_DIRECTORY.mkdir(parents=True, exist_ok=True)
-
-uploaded_file = st.file_uploader("Upload your dataset (CSV format)", type=["csv"])
+# File uploader widget
+uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"])
 
 if uploaded_file is not None:
-    file_path = DATA_DIRECTORY / uploaded_file.name
-    with open(file_path, "wb") as f:
-        f.write(uploaded_file.getbuffer())
+    # Process the uploaded CSV file
+    df, message = process_csv(uploaded_file)
+    
+    if df is not None:
+        st.success(message)
 
-    data_processor = DataProcessor(file_path)
-    data = data_processor.load_data()
+        # Show the data in a nice format
+        st.subheader("Preview of Uploaded Data:")
+        st.dataframe(df.head(), use_container_width=True)
 
-    if data_processor.is_valid():
-        st.success("Dataset loaded and validated successfully!")
+        # Filter options
+        st.sidebar.subheader("Filters")
 
-        visualizer = Visualizer(data)
+        # Select unique options for filtering
+        filter_column = st.sidebar.selectbox("Choose a filter column", df.columns)
+        filter_value = None
 
-        st.subheader("Time in In Basket vs Orders (Scatter Plot)")
-        visualizer.plot_time_in_vs_orders()
+        if filter_column in df.columns:
+            filter_value = st.sidebar.selectbox(f"Select {filter_column}", df[filter_column].unique())
 
-        st.subheader("Appointment Efficiency (Bar Chart)")
-        visualizer.plot_appointment_efficiency()
+        # Select plot type
+        st.sidebar.subheader("Select Plot Type")
+        plot_type = st.sidebar.selectbox("Choose a plot type", 
+                                         ["Scatter Plot", "Bar Chart", "Bubble Chart", "Pie Chart"])
 
-        st.subheader("Time Metrics (Line Chart)")
-        visualizer.plot_time_metrics_line()
+        # Visualize data interactively
+        st.subheader(f"Interactive {plot_type} Visualization")
+        x_col = st.selectbox("Select X-axis", df.columns)
+        y_col = st.selectbox("Select Y-axis", df.columns)
 
-        st.subheader("Documentation Length Distribution (Histogram)")
-        visualizer.plot_documentation_histogram()
+        # Generate plot using the selected columns and filter
+        if x_col and y_col:
+            fig = create_plot(df, plot_type, x_col, y_col, filter_col=filter_column, filter_value=filter_value)
+            st.plotly_chart(fig)
+
+        # Displaying basic insights
+        st.subheader("Basic Data Insights")
+        st.write(f"Total records in dataset: {len(df)}")
+
+        # Summary Statistics
+        st.subheader("Summary Statistics")
+        st.write(df.describe())
 
     else:
-        st.error("Dataset is invalid. Please check the column names and data integrity.")
+        st.error(message)
+
 else:
-    st.warning("Please upload a CSV file to proceed.")
+    st.info("Please upload a CSV file to get started.")
